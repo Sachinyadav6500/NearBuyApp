@@ -25,20 +25,23 @@ internal final class NearByPlacesViewModel: NearByPlacesViewModelProtocol {
     private var currentPage: Int = 1
     private var totalLocatios: Int = 1000
     private let cacheService: PlacesCacheServiceType
+    private let locationService: LocationManagerProtocol
 
     init(useCase: NearByPlaceUseCaseType = NearByPlaceUseCase(),
          cacheService: PlacesCacheServiceType = PlacesCacheService(),
+         locationService: LocationManagerProtocol =  LocationManager.sharedInstance,
          delegate: NearByPlacesViewProtocol) {
         self.useCase = useCase
         self.cacheService = cacheService
+        self.locationService = locationService
         self.delegate = delegate
     }
     
     internal func onPageLoad() {
         // TODO: Return the data stored in persistance.
         delegate?.showLoader()
-        LocationManager.sharedInstance.delegate = self
-        LocationManager.sharedInstance.requestLocation()
+        locationService.delegate = self
+        locationService.requestLocation()
         dataRequested = true
     }
     
@@ -68,7 +71,7 @@ internal final class NearByPlacesViewModel: NearByPlacesViewModelProtocol {
     }
     
     private func getNearByVenueData(page: Int = 1, query:String? = nil, range: String = "15mi") {
-        guard let currentLocation = LocationManager.sharedInstance.getCurrentLocation() else {
+        guard let currentLocation = locationService.getCurrentLocation() else {
             // TODO: Return the data stored in persistance.
             // Currently fake method added
             cacheService.fetchSavedPlacesData { [weak self] cachedData in
